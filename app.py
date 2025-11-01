@@ -26,37 +26,19 @@ if 'Your Academic Stage' in df.columns and 'Rate your academic stress index' in 
 else:
     st.warning("Columns for academic stage or stress index not found in dataset.")
 
-# --- 2️⃣ Home Pressure vs Stress Index (Interactive) ---
-st.subheader("2️⃣ Home Pressure vs Stress Index")
-
-if 'Academic pressure from your home' in df.columns and 'Rate your academic stress index' in df.columns:
-    fig2 = px.box(
-        df,
-        x='Academic pressure from your home',
-        y='Rate your academic stress index',
-        color='Academic pressure from your home',
-        title='Home Academic Pressure vs Stress Index',
-        points='all'
-    )
-    st.plotly_chart(fig2, use_container_width=True)
-
-    st.markdown("""
-    **Interpretation:**  
-    Students with higher academic pressure from home exhibit greater stress index values,  
-    suggesting that parental expectations significantly influence academic stress.
-    """)
-else:
-    st.warning("Columns for home pressure or stress index not found in dataset.")
-
-
 # --- 3️⃣ Study Environment Distribution ---
 st.subheader("3️⃣ Study Environment Distribution")
 if 'Study Environment' in df.columns:
-    env_counts = df['Study Environment'].value_counts()
-    fig3, ax3 = plt.subplots()
-    ax3.pie(env_counts, labels=env_counts.index, autopct='%1.1f%%', startangle=90)
-    ax3.set_title('Study Environment Distribution')
-    st.pyplot(fig3)
+    env_counts = df['Study Environment'].value_counts().reset_index()
+    env_counts.columns = ['Study Environment', 'Count']
+    fig3 = px.pie(
+        env_counts,
+        names='Study Environment',
+        values='Count',
+        title='Study Environment Distribution',
+        hole=0.4
+    )
+    st.plotly_chart(fig3, use_container_width=True)
     st.markdown("""
     **Interpretation:**  
     Most students report studying in a peaceful environment, but a notable portion face noisy surroundings.  
@@ -68,8 +50,17 @@ else:
 # --- 4️⃣ Coping Strategies Used by Students ---
 st.subheader("4️⃣ Coping Strategies Used by Students")
 if 'What coping strategy you use as a student?' in df.columns:
-    coping_counts = df['What coping strategy you use as a student?'].value_counts().head(10)
-    st.bar_chart(coping_counts)
+    coping_counts = df['What coping strategy you use as a student?'].value_counts().reset_index()
+    coping_counts.columns = ['Coping Strategy', 'Count']
+    fig4 = px.bar(
+        coping_counts.head(10),
+        x='Count',
+        y='Coping Strategy',
+        orientation='h',
+        color='Coping Strategy',
+        title='Top 10 Coping Strategies Used by Students'
+    )
+    st.plotly_chart(fig4, use_container_width=True)
     st.markdown("""
     **Interpretation:**  
     Students often use logical and social coping strategies such as analyzing situations or seeking social support.  
@@ -81,12 +72,15 @@ else:
 # --- 5️⃣ Peer Pressure vs Stress Index ---
 st.subheader("5️⃣ Peer Pressure vs Academic Stress Index")
 if 'Peer pressure' in df.columns and 'Rate your academic stress index' in df.columns:
-    fig5, ax5 = plt.subplots()
-    ax5.scatter(df['Peer pressure'], df['Rate your academic stress index'])
-    ax5.set_xlabel('Peer Pressure')
-    ax5.set_ylabel('Stress Index')
-    ax5.set_title('Peer Pressure vs Academic Stress Index')
-    st.pyplot(fig5)
+    fig5 = px.scatter(
+        df,
+        x='Peer pressure',
+        y='Rate your academic stress index',
+        color='Peer pressure',
+        title='Peer Pressure vs Academic Stress Index',
+        trendline='ols'
+    )
+    st.plotly_chart(fig5, use_container_width=True)
     st.markdown("""
     **Interpretation:**  
     A positive trend appears between peer pressure and stress index.  
