@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.express as px
 
 # --- Load Dataset from GitHub ---
 url = "https://raw.githubusercontent.com/Nashalan/Tutorial/refs/heads/main/Academic%20Stress%20Level.csv"
