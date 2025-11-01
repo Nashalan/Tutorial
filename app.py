@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # --- Load Dataset from GitHub ---
-url = "https://raw.githubusercontent.com/<username>/<repo>/main/Academic%20Stress%20Level.csv"
+url = "https://raw.githubusercontent.com/Nashalan/Tutorial/refs/heads/main/Academic%20Stress%20Level.csv"
 df = pd.read_csv(url)
 
 st.title("📊 Academic Stress Analysis Dashboard")
