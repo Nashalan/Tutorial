@@ -9,7 +9,7 @@ st.header("Academic Stress Level",divider="gray")
 import pandas as pd
 
 # Load the uploaded file
-file_path = "/mnt/data/Academic Stress Level.csv"
+file_path = "https://raw.githubusercontent.com/Nashalan/Tutorial/refs/heads/main/Academic%20Stress%20Level.csv"
 df = pd.read_csv(file_path)
 
 # Display the first few rows to understand its structure
