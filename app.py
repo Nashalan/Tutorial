@@ -10,9 +10,6 @@ df = pd.read_csv(url)
 # --- Clean column names ---
 df.columns = df.columns.str.strip()
 
-# Optional: Display columns for verification
-st.write("📋 Columns in dataset:", df.columns.tolist())
-
 st.title("📊 Academic Stress Analysis Dashboard")
 
 # --- 1️⃣ Average Academic Stress by Stage ---
