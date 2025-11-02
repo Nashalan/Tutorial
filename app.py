@@ -1,42 +1,21 @@
 import streamlit as st
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import plotly.express as px
 
-st.set_page_config(page_title="Academic Stress Level Dashboard", layout="wide")
+st.set_page_config(page_title="Academic Stress Dashboard", layout="wide")
 
-# ------------------------
-# Load Dataset
-# ------------------------
+# Load data
 DATA_URL = "https://raw.githubusercontent.com/Nashalan/Assignment-/refs/heads/main/Academic%20Stress%20Level.csv"
 
 @st.cache_data
 def load_data():
     df = pd.read_csv(DATA_URL)
-    # Clean column names for consistency
     df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
     return df
 
 df = load_data()
-
-# ------------------------
-# Main Page
-# ------------------------
-st.title("📊 Academic Stress Level Dashboard")
-st.markdown("""
-Welcome to the **Academic Stress Level Visualization App**.  
-This dashboard explores how students experience academic stress and the factors that influence it.
-
-### 📘 Pages
-- **Stress Level Distribution:** Explore the spread of stress levels.  
-- **Academic Factors & Stress:** See how grades and study hours affect stress.  
-- **Lifestyle Factors & Stress:** Understand how sleep and activity impact stress.
-
-Dataset Source:  
-[Academic Stress Level.csv](https://raw.githubusercontent.com/Nashalan/Assignment-/refs/heads/main/Academic%20Stress%20Level.csv)
-""")
-
-st.write("### 🧾 Dataset Preview")
-st.dataframe(df.head())
-
 
 # ------------------------
 # Sidebar menu
@@ -113,4 +92,3 @@ elif page == "Lifestyle Factors":
     if all(c in df.columns for c in ['sleep_duration', 'physical_activity', 'stress_level']):
         fig = px.scatter_3d(df, x='sleep_duration', y='physical_activity', z='stress_level', color='stress_level')
         st.plotly_chart(fig)
-
