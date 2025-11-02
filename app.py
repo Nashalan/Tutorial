@@ -14,10 +14,9 @@ def load_data():
     df = pd.read_csv(DATA_URL)
     df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
     return df
-df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
-
-
+    
 df = load_data()
+df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
 
 # ------------------------
 # Sidebar menu
