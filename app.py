@@ -2,7 +2,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 
 # ---------------------------------------------------
 # CONFIGURATION
@@ -37,109 +36,108 @@ stress_col = get_stress_column(df)
 st.sidebar.title("📊 Academic Stress Dashboard")
 page = st.sidebar.radio(
     "Navigate to:",
-    ["🏠 Home", "🎯 Stress Overview", "🎓 Academic Factors", "💤 Lifestyle & Well-being"]
+    ["🏠 Home", "🎯 Stress Overview", "🎓 Academic Factors", "💬 Social & Support Systems"]
 )
 
 # ---------------------------------------------------
-# HOME PAGE
+# PAGE 1 — HOME
 # ---------------------------------------------------
 if page == "🏠 Home":
     st.title("🏫 Academic Stress Level Dashboard")
     st.markdown("""
     Welcome to the **Academic Stress Visualization Dashboard**!  
-    This dashboard explores how academic and lifestyle factors influence student stress.
+    This dashboard explores how **academic**, **psychological**, and **social factors** influence student stress.
 
-    🔹 **Stress Overview:** Understand the distribution of stress among students.  
-    🔹 **Academic Factors:** Explore how study habits, grades, and workload affect stress.  
-    🔹 **Lifestyle & Well-being:** See how sleep and activity patterns influence stress.
+    🔹 **Stress Overview** – General patterns of stress  
+    🔹 **Academic Factors** – How study habits and workload affect stress  
+    🔹 **Social & Support Systems** – Role of relationships and support in stress reduction
     """)
 
     st.subheader("📘 Dataset Overview")
     st.dataframe(df.head())
 
-    st.info("👉 Use the sidebar to switch between pages and explore insights interactively!")
+    st.info("👉 Use the sidebar to switch between pages for different insights!")
 
 # ---------------------------------------------------
-# STRESS OVERVIEW PAGE
+# PAGE 2 — STRESS OVERVIEW
 # ---------------------------------------------------
 elif page == "🎯 Stress Overview":
-    st.title("🎯 Stress Distribution & Overview")
+    st.title("🎯 Stress Overview & Patterns")
 
     st.markdown("### 🎯 Objective")
-    st.write("To visualize how stress levels are distributed and understand overall patterns across students.")
+    st.write("To visualize how stress levels are distributed and identify overall trends across the student population.")
 
     st.markdown("### 📦 Summary Box")
     st.info("""
-    This section visualizes the **distribution and spread** of student stress levels.
-    You can identify where most students fall on the stress scale and see 
-    if any groups (like gender or course) experience higher average stress.
+    This section shows the overall **distribution** of stress levels 
+    and differences across demographic factors such as gender or age.
     """)
 
     if stress_col:
         # Histogram
-        fig1 = px.histogram(df, x=stress_col, nbins=20, title="Distribution of Stress Levels",
-                            color_discrete_sequence=["#4FC3F7"])
+        fig1 = px.histogram(df, x=stress_col, nbins=20, color_discrete_sequence=["#4FC3F7"],
+                            title="Distribution of Student Stress Levels")
         fig1.update_layout(xaxis_title="Stress Level", yaxis_title="Count")
         st.plotly_chart(fig1, use_container_width=True)
 
-        # Average stress by gender (if exists)
+        # Average stress by gender
         if "gender" in df.columns:
             fig2 = px.bar(df, x="gender", y=stress_col, color="gender",
-                          title="Average Stress Level by Gender", barmode="group")
+                          title="Average Stress by Gender", barmode="group")
             st.plotly_chart(fig2, use_container_width=True)
 
-        # Trend by age (if exists)
+        # Stress vs Age
         if "age" in df.columns:
             fig3 = px.line(df.sort_values("age"), x="age", y=stress_col,
-                           title="Stress Trend Across Age", markers=True)
+                           title="Stress Level Trend by Age", markers=True)
             st.plotly_chart(fig3, use_container_width=True)
 
         st.markdown("### 💬 Interpretation")
         st.success("""
-        The distribution shows that most students fall within a moderate stress range.  
-        Gender-based and age-based trends indicate how different groups experience stress differently, 
-        revealing potential areas for student support.
+        Most students fall within moderate stress levels.  
+        Differences between genders or ages reveal how various groups experience stress uniquely, 
+        helping institutions target support efforts effectively.
         """)
     else:
         st.error("No stress column found in dataset.")
 
 # ---------------------------------------------------
-# ACADEMIC FACTORS PAGE (DIFFERENT VISUALS)
+# PAGE 3 — ACADEMIC FACTORS
 # ---------------------------------------------------
 elif page == "🎓 Academic Factors":
     st.title("🎓 Academic Factors Influencing Stress")
 
     st.markdown("### 🎯 Objective")
-    st.write("To explore how academic workload, performance, and habits affect students' stress levels using interactive visuals.")
+    st.write("To explore how academic workload, study time, and performance are linked to students' stress levels.")
 
     st.markdown("### 📦 Summary Box")
     st.info("""
-    Academic-related variables such as **study hours**, **course load**, and **grades** 
-    can have strong links to stress.  
-    The visuals here highlight which academic patterns most contribute to stress variation.
+    Academic pressure plays a significant role in student stress.
+    This section analyzes how factors such as **study hours**, **course difficulty**, and **grades**
+    correlate with stress using interactive visuals.
     """)
 
     if stress_col:
+        # Correlation with stress
         numeric_cols = df.select_dtypes(include="number").columns.tolist()
+        if stress_col in numeric_cols:
+            corr = df[numeric_cols].corr()[stress_col].sort_values(ascending=False).reset_index()
+            corr.columns = ['Variable', 'Correlation with Stress']
+            fig_corr = px.bar(corr, x='Variable', y='Correlation with Stress',
+                              color='Correlation with Stress', color_continuous_scale='RdBu',
+                              title="Correlation Between Academic Variables and Stress")
+            st.plotly_chart(fig_corr, use_container_width=True)
 
-        # Correlation Heatmap
-        corr = df[numeric_cols].corr()[stress_col].sort_values(ascending=False).reset_index()
-        corr.columns = ['Variable', 'Correlation with Stress']
-        fig_corr = px.bar(corr, x='Variable', y='Correlation with Stress', color='Correlation with Stress',
-                          color_continuous_scale='RdBu', title="Correlation of Academic Factors with Stress")
-        st.plotly_chart(fig_corr, use_container_width=True)
+        # Scatter of user choice
+        academic_cols = [c for c in df.columns if "study" in c or "grade" in c or "course" in c]
+        if academic_cols:
+            x_var = st.selectbox("Select an Academic Variable:", academic_cols)
+            fig = px.scatter(df, x=x_var, y=stress_col, color=stress_col,
+                             color_continuous_scale="Inferno", trendline="ols",
+                             title=f"{x_var.replace('_',' ').title()} vs Stress Level")
+            st.plotly_chart(fig, use_container_width=True)
 
-        # Scatter matrix (pairplot style)
-        selected = st.multiselect("Select academic variables to compare with stress:", 
-                                  [col for col in numeric_cols if col != stress_col],
-                                  default=[numeric_cols[0]] if numeric_cols else [])
-        if selected:
-            fig_matrix = px.scatter_matrix(df, dimensions=selected + [stress_col],
-                                           color=stress_col,
-                                           title="Relationship Between Academic Variables and Stress")
-            st.plotly_chart(fig_matrix, use_container_width=True)
-
-        # Course Load (if available)
+        # Mean stress by academic variable
         if "course_load" in df.columns:
             avg_stress = df.groupby("course_load")[stress_col].mean().reset_index()
             fig_bar = px.bar(avg_stress, x="course_load", y=stress_col, color=stress_col,
@@ -148,58 +146,55 @@ elif page == "🎓 Academic Factors":
 
         st.markdown("### 💬 Interpretation")
         st.success("""
-        The correlation chart shows which academic variables most influence stress.  
-        A high positive correlation (red) means as that variable increases, stress rises too — 
-        for instance, higher study hours or heavier course loads.  
-        Interactive scatter plots reveal clusters of students with high or low stress,
-        suggesting performance-based stress differences.
+        Academic workload and grades show a direct relationship with stress.  
+        Heavy course loads or long study hours often correlate with higher stress, 
+        while balanced workloads are associated with lower stress levels.
         """)
     else:
         st.error("No stress column found in dataset.")
 
 # ---------------------------------------------------
-# LIFESTYLE & WELL-BEING PAGE
+# PAGE 4 — SOCIAL & SUPPORT SYSTEMS
 # ---------------------------------------------------
-elif page == "💤 Lifestyle & Well-being":
-    st.title("💤 Lifestyle & Well-being Factors")
+elif page == "💬 Social & Support Systems":
+    st.title("💬 Social & Support Systems & Stress")
 
     st.markdown("### 🎯 Objective")
-    st.write("To analyze how lifestyle factors like sleep duration, exercise, and social habits impact stress levels.")
+    st.write("To examine how social interactions, friendships, and emotional support affect students’ stress levels.")
 
     st.markdown("### 📦 Summary Box")
     st.info("""
-    This page focuses on daily routines that affect stress management.  
-    Factors such as **sleep**, **physical activity**, and **leisure time** 
-    play crucial roles in determining a student's resilience to stress.
+    Support systems — friends, family, and mentors — can significantly reduce stress.
+    This section visualizes how social engagement and emotional support levels relate to student stress.
     """)
 
     if stress_col:
-        # Sleep vs Stress
-        if "sleep_duration" in df.columns:
-            fig1 = px.scatter(df, x="sleep_duration", y=stress_col, color=stress_col,
-                              color_continuous_scale="Viridis", trendline="ols",
-                              title="Sleep Duration vs Stress Level")
+        # 1. Social support vs stress
+        if "social_support" in df.columns:
+            fig1 = px.scatter(df, x="social_support", y=stress_col, color=stress_col,
+                              color_continuous_scale="Tealrose", trendline="ols",
+                              title="Social Support vs Stress Level")
             st.plotly_chart(fig1, use_container_width=True)
 
-        # Physical activity vs Stress (using violin plot)
-        if "physical_activity" in df.columns:
-            fig2 = px.violin(df, x="physical_activity", y=stress_col, color="physical_activity",
-                             box=True, points="all", title="Stress Levels by Physical Activity")
+        # 2. Friend interaction vs stress
+        if "friend_interaction" in df.columns:
+            fig2 = px.box(df, x="friend_interaction", y=stress_col, color="friend_interaction",
+                          title="Stress Levels Across Friendship Interaction Frequency")
             st.plotly_chart(fig2, use_container_width=True)
 
-        # Combined 3D plot
-        if all(c in df.columns for c in ["sleep_duration", "physical_activity"]):
-            fig3 = px.scatter_3d(df, x="sleep_duration", y="physical_activity", z=stress_col,
-                                 color=stress_col, color_continuous_scale="Plasma",
-                                 title="3D Relationship: Sleep, Activity & Stress")
+        # 3. Combined 3D View (if variables exist)
+        if all(c in df.columns for c in ["social_support", "friend_interaction"]):
+            fig3 = px.scatter_3d(df, x="social_support", y="friend_interaction", z=stress_col,
+                                 color=stress_col, color_continuous_scale="Viridis",
+                                 title="3D Relationship: Social Support, Friendship & Stress")
             st.plotly_chart(fig3, use_container_width=True)
 
         st.markdown("### 💬 Interpretation")
         st.success("""
-        The visuals show that students with **more sleep** and **regular physical activity** 
-        report significantly lower stress levels.  
-        The 3D visualization highlights that combining adequate rest with movement 
-        creates the lowest stress zone — reinforcing the value of balanced routines.
+        Students with **strong social support** and **frequent social interactions**
+        generally report **lower stress levels**.  
+        The 3D plot shows that combining emotional support and active friendships 
+        creates the lowest stress zones — emphasizing the power of community support.
         """)
     else:
         st.error("No stress column found in dataset.")
