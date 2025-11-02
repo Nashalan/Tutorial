@@ -25,6 +25,8 @@ DATA_URL = "https://raw.githubusercontent.com/Nashalan/Assignment-/refs/heads/ma
 @st.cache_data
 def load_data():
     return pd.read_csv(DATA_URL)
+col = [c for c in df.columns if 'stress' in c.lower()][0]
+sns.histplot(df[col], kde=True, color="skyblue", ax=ax)
 
 df = load_data()
 
