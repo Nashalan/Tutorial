@@ -36,6 +36,3 @@ Dataset Source:
 
 st.write("### 🧾 Dataset Preview")
 st.dataframe(df.head())
-
-st.write("### 📑 Columns in the Dataset")
-st.write(df.columns.tolist())
